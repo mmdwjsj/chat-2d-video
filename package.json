@@ -19,7 +19,7 @@
     "example": "node examples/quickstart.mjs",
     "demo": "python scripts/demo_animation.py",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "node --import tsx --test apps/web/src/stickyStack.test.ts packages/core/src/store.test.ts packages/core/src/storyboard.test.ts packages/core/src/script-tasks.test.ts packages/core/src/scriptLines.test.ts packages/core/src/sceneMatch.test.ts packages/ai-providers/src/local.test.ts packages/tts-providers/src/diagnose.test.ts packages/video-renderer/src/timeline.test.ts packages/video-renderer/src/sceneArt.test.ts packages/video-renderer/src/mouth.test.ts packages/video-renderer/src/exportWiring.test.ts apps/server/src/previewFrames.test.ts apps/server/src/sceneMatchWiring.test.ts"
+    "test": "node --import tsx --test apps/web/src/stickyStack.test.ts packages/core/src/store.test.ts packages/core/src/storyboard.test.ts packages/core/src/script-tasks.test.ts packages/core/src/scriptLines.test.ts packages/core/src/sceneMatch.test.ts packages/ai-providers/src/local.test.ts packages/tts-providers/src/diagnose.test.ts packages/video-renderer/src/timeline.test.ts packages/video-renderer/src/sceneArt.test.ts packages/video-renderer/src/mouth.test.ts packages/video-renderer/src/exportWiring.test.ts apps/server/src/previewFrames.test.ts apps/server/src/sceneMatchWiring.test.ts packages/animation/src/animation.test.ts packages/core/src/actionCues.test.ts packages/video-renderer/src/animatedFrame.test.ts apps/server/src/animationAssets.test.ts"
   },
   "dependencies": {
     "express": "^4.21.2",

@@ -16,9 +16,11 @@ import type { TtsDiagnosis, TtsProvider } from '@thai-video/tts-providers';
 import {
   buildFrame, captureFrame, computeTimeline, findBrowser, mouthTimeline,
   prepareShotVoice, renderEnvironment, renderVideo, scheduleCleanup,
-  usedShapes, writeFrameSequence,
+  usedShapes, writeFrameSequence, writeKeyedFrameSequence,
 } from '@thai-video/video-renderer';
 import type { FrameInput, MouthShape } from '@thai-video/video-renderer';
+import { buildAnimatedShotPlan } from './animationWiring.js';
+import type { AnimatedShotPlan } from './animationWiring.js';
 import {
   castOf, characterArtOf, resolveAudio, sceneOf, shotFrameInput, shotVoiceCachePath,
   subtitles, voiceLines,
@@ -188,8 +190,11 @@ export const runVideoRender = async (
     voiceWav: string | null;
     /** 有人说话的镜头才有：与视频帧一一对应的口型序列 */
     mouthTimeline?: MouthShape[];
+    /** 动画镜头的帧档（与成片同源）；有值时优先于 4 档口型链路 */
+    animated?: AnimatedShotPlan;
   };
   const defs: SegmentDef[] = [];
+  const animationNotes = new Set<string>();
   const firstScene = sceneOf(bundle, shots[0]);
   defs.push({
     id: 'intro', durationSec: introSec, motion: false, voiceWav: null,
@@ -205,11 +210,19 @@ export const runVideoRender = async (
     const durationSec = timeline.shots[i].durationSec;
     // 帧数必须与 renderVideo 的 framesOf(durationSec) 完全一致，否则时长铁律会破。
     const frameCount = Math.max(1, Math.round(durationSec * fps));
+    // 动画帧档构建失败 / 注册表关闭时返回 null，自动回退到下面的 4 档口型链路。
+    const animation = buildAnimatedShotPlan({
+      bundle, shot, mode, index: i + 1, total: shots.length,
+      durationSec, fps, frameCount, voiceWav: voiceWavs[i], inline: true,
+      projectTitle: meta.name,
+    });
+    for (const note of animation.notes) animationNotes.add(note);
     defs.push({
       id: shot.id,
       durationSec,
       motion: true,
       voiceWav: voiceWavs[i],
+      animated: animation.plan ?? undefined,
       mouthTimeline: cast.length
         ? mouthTimeline({
           frames: frameCount, fps, voiceWav: voiceWavs[i],
@@ -238,7 +251,26 @@ export const runVideoRender = async (
     const def = defs[i];
     const capture = { browser: browser ?? undefined, profileDir };
     // 截图串行执行，共用一个浏览器缓存目录，避免每个镜头都留下一份几十 MB 的 profile
-    if (def.mouthTimeline) {
+    if (def.animated) {
+      // 动画镜头：每个 frameKey 只截一张 PNG，再按时间轴硬链接铺成逐帧序列。
+      // 文件名用序号而不是 frameKey（frameKey 含 | 等 Windows 非法字符）。
+      const pngByKey: Record<string, string> = {};
+      let n = 0;
+      for (const [key, html] of Object.entries(def.animated.htmlByKey)) {
+        const tag = `k${String(n).padStart(3, '0')}`;
+        n += 1;
+        const htmlPath = path.join(framesDir, `frame-${i}-${tag}.html`);
+        const png = path.join(framesDir, `frame-${i}-${tag}.png`);
+        await captureFrame(html, htmlPath, png, capture);
+        pngByKey[key] = png;
+      }
+      frameSequences.push(writeKeyedFrameSequence({
+        dir: path.join(framesDir, `anim-${i}`),
+        pngByKey,
+        timeline: def.animated.timeline,
+      }));
+      framePngs.push(Object.values(pngByKey)[0] ?? '');
+    } else if (def.mouthTimeline) {
       // 对白镜头：按本镜头实际用到的嘴型各截一张，再铺成逐帧序列。
       // 无配音时 mouthTimeline 也会给出开合节奏，不会退回「一张静帧」。
       const shapePngs: Partial<Record<MouthShape, string>> = {};
@@ -300,6 +332,8 @@ export const runVideoRender = async (
     totalFrames: result.totalFrames,
     shotCount: shots.length,
     mouthSyncedShots: frameSequences.filter(Boolean).length,
+    animatedShots: defs.filter((d) => d.animated).length,
+    animationFrameKeys: defs.reduce((sum, d) => sum + (d.animated?.frameKeyCount ?? 0), 0),
     width, height, fps,
     codec: 'H.264 / AAC',
     hasVoiceOver: result.hasVoiceOver,
@@ -319,6 +353,7 @@ export const runVideoRender = async (
     timelineWarnings: [
       ...warnings,
       ...voiceFailures.map((f) => `镜头 ${f.shotId}「${f.text}」配音失败：${f.reason}`),
+      ...[...animationNotes].map((n) => `动画降级：${n}`),
     ],
     browser: env.browser,
     renderedAt: new Date().toISOString(),

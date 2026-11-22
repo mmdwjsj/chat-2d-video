@@ -1,0 +1,67 @@
+{
+  "slug": "aton",
+  "source": "assets/characters/library/aton/fullBody.png",
+  "canvas": {
+    "w": 1024,
+    "h": 1536
+  },
+  "baseColor": [
+    229,
+    227,
+    224
+  ],
+  "parts": {
+    "head": {
+      "src": "assets/characters/cutout/aton/head.png",
+      "box": {
+        "x": 388,
+        "y": 133,
+        "w": 255,
+        "h": 295
+      },
+      "pivot": {
+        "x": 518,
+        "y": 420
+      }
+    },
+    "torso": {
+      "src": "assets/characters/cutout/aton/torso.png",
+      "box": {
+        "x": 297,
+        "y": 414,
+        "w": 437,
+        "h": 557
+      },
+      "pivot": {
+        "x": 517,
+        "y": 957
+      }
+    },
+    "legL": {
+      "src": "assets/characters/cutout/aton/legL.png",
+      "box": {
+        "x": 307,
+        "y": 941,
+        "w": 210,
+        "h": 503
+      },
+      "pivot": {
+        "x": 513,
+        "y": 957
+      }
+    },
+    "legR": {
+      "src": "assets/characters/cutout/aton/legR.png",
+      "box": {
+        "x": 517,
+        "y": 941,
+        "w": 208,
+        "h": 503
+      },
+      "pivot": {
+        "x": 521,
+        "y": 957
+      }
+    }
+  }
+}

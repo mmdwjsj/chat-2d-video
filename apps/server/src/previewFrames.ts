@@ -6,6 +6,7 @@
  * 完全是两套画面；这里把画面生成收回服务端，前端不再拥有任何画面逻辑。
  */
 import { buildFrame, MOUTH_SHAPES, mouthTimeline, voiceLevels } from '@thai-video/video-renderer';
+import { buildAnimatedShotPlan } from './animationWiring.js';
 import type { MouthShape } from '@thai-video/video-renderer';
 import type { ExportMode, ProjectBundle } from '@thai-video/core/types';
 import {
@@ -24,6 +25,11 @@ export type PreviewShotFrames = {
   audioUrl: string | null;
   /** 口型驱动来源，界面如实标注，避免把「按台词节奏」说成「配音同步」 */
   lipSource: 'voice' | 'text' | 'none';
+  /** 动画帧档：与成片同源，frameKeys[i] 决定第 i 帧显示哪张 HTML */
+  frameKeys?: string[];
+  framesByKey?: Record<string, string>;
+  /** 显式降级说明，界面要显示，不能静默 */
+  degradations?: string[];
 };
 
 export type PreviewFramesPayload = {
@@ -73,10 +79,22 @@ export const buildPreviewFrames = (input: {
         ? buildFrame({ ...frame, mouthShape: shape })
         : buildFrame(frame); // 旁白 / 无人物镜头：保留原来的情绪嘴型，与成片一致
     }
+    // 动画帧档与成片导出走同一份 wiring：预览里能看到姿态、位移与视差。
+    const animation = buildAnimatedShotPlan({
+      bundle, shot, mode, index: i + 1, total: shots.length,
+      durationSec, fps, frameCount, voiceWav: wav, inline: false,
+      projectTitle: input.projectTitle,
+    });
+
     return {
       shotId: shot.id, durationSec, fps, timeline, frames,
       audioUrl: previewAudioUrl(shot, mode),
       lipSource: !cast.length ? 'none' : byVoice ? 'voice' : 'text',
+      ...(animation.plan ? {
+        frameKeys: animation.plan.timeline,
+        framesByKey: animation.plan.htmlByKey,
+        degradations: animation.plan.degradations,
+      } : {}),
     };
   });
 

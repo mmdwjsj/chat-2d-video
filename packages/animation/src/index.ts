@@ -1,6 +1,9 @@
 import type { AnimationPlan, PlanInput } from './types.js';
 
 export * from './types.js';
+export * from './contracts.js';
+export * from './registry.js';
+export * from './director.js';
 
 const COMPLEX = ['走路', '骑摩托', '骑车', '跳舞', '跑', '复杂动作'];
 

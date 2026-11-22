@@ -1,0 +1,534 @@
+{
+  "schemaVersion": 1,
+  "enabled": true,
+  "note": "动画资产注册表。新增人物/场景/动作只需在这里追加一项并放入对应图片，渲染代码不需要改。缺素材会显式记录降级，不再静默冒用他人形象或别的场景。场景支持两种真图：整张底图 backgroundImage（垫在最下层、不参与视差），或给 defaults/scenes.<id>.layers 的某层填 src（该层用真图替代程序化色块，仍按 parallax 做视差）。src 留空/不填 = 程序化生成。Scene.backgroundImage 字段也已接通，项目里填了路径同样生效。",
+  "_sceneImageExample": {
+    "说明": "把下面这段合并进 scenes 里任一场景（或直接填 Scene.backgroundImage）即可让场景真图生效，渲染代码零改动。src 是相对项目根的路径。",
+    "scene-apartment": {
+      "backgroundImage": "assets/scenes/apartment/bg.png",
+      "layers": [
+        {
+          "key": "sky",
+          "kind": "sky",
+          "parallax": 0.05,
+          "src": "assets/scenes/apartment/sky.png",
+          "fit": "cover"
+        },
+        {
+          "key": "far",
+          "kind": "far",
+          "parallax": 0.18,
+          "src": "assets/scenes/apartment/far.png"
+        },
+        {
+          "key": "mid",
+          "kind": "mid",
+          "parallax": 0.42,
+          "src": "assets/scenes/apartment/mid.png"
+        },
+        {
+          "key": "near",
+          "kind": "near",
+          "parallax": 0.72,
+          "src": "assets/scenes/apartment/near.png"
+        },
+        {
+          "key": "foreground",
+          "kind": "foreground",
+          "parallax": 1,
+          "src": "assets/scenes/apartment/fg.png",
+          "opacity": 1
+        }
+      ]
+    }
+  },
+  "defaults": {
+    "layers": [
+      {
+        "key": "sky",
+        "kind": "sky",
+        "parallax": 0.05
+      },
+      {
+        "key": "far",
+        "kind": "far",
+        "parallax": 0.18
+      },
+      {
+        "key": "mid",
+        "kind": "mid",
+        "parallax": 0.42
+      },
+      {
+        "key": "near",
+        "kind": "near",
+        "parallax": 0.72
+      },
+      {
+        "key": "foreground",
+        "kind": "foreground",
+        "parallax": 1
+      }
+    ],
+    "baseline": 1560,
+    "anchors": {
+      "center": [
+        0.5,
+        0.82
+      ],
+      "left": [
+        0.22,
+        0.82
+      ],
+      "right": [
+        0.78,
+        0.82
+      ],
+      "sofa": [
+        0.28,
+        0.8
+      ],
+      "door": [
+        0.86,
+        0.78
+      ],
+      "kitchen": [
+        0.82,
+        0.8
+      ],
+      "table": [
+        0.58,
+        0.82
+      ]
+    }
+  },
+  "characters": {
+    "char-a": {
+      "id": "char-a",
+      "name": "妮娜",
+      "width": 1024,
+      "height": 1536,
+      "defaultPose": "stand",
+      "poses": {
+        "stand": {
+          "key": "stand",
+          "src": "assets/characters/library/nina/fullBody.png",
+          "anchor": [
+            0.5,
+            0.94
+          ],
+          "mouth": [
+            0.4917,
+            0.252
+          ],
+          "mouthW": 0.0576,
+          "skin": "rgb(208,157,114)"
+        },
+        "turn": {
+          "key": "turn",
+          "src": "assets/characters/library/nina/side.png",
+          "anchor": [
+            0.5,
+            0.94
+          ],
+          "mouth": [
+            0.4917,
+            0.252
+          ],
+          "mouthW": 0.0576,
+          "skin": "rgb(208,157,114)"
+        },
+        "back": {
+          "key": "back",
+          "src": "assets/characters/library/nina/back.png",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "sit": {
+          "key": "sit",
+          "src": "assets/images/char-a/pose-sit-v1.png",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "walk1": {
+          "key": "walk1",
+          "src": "assets/images/char-a/pose-walk1-v1.png",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        }
+      }
+    },
+    "char-b": {
+      "id": "char-b",
+      "name": "阿顿",
+      "width": 1024,
+      "height": 1536,
+      "defaultPose": "stand",
+      "poses": {
+        "stand": {
+          "key": "stand",
+          "src": "assets/characters/library/aton/fullBody.png",
+          "anchor": [
+            0.5,
+            0.94
+          ],
+          "mouth": [
+            0.5049,
+            0.2445
+          ],
+          "mouthW": 0.0703,
+          "skin": "rgb(217,160,111)"
+        },
+        "sit": {
+          "key": "sit",
+          "src": "assets/characters/library/aton/halfBody.png",
+          "anchor": [
+            0.5,
+            0.98
+          ],
+          "mouth": [
+            0.5049,
+            0.2445
+          ],
+          "mouthW": 0.0703,
+          "skin": "rgb(217,160,111)"
+        },
+        "walk1": {
+          "key": "walk1",
+          "src": "assets/characters/library/aton/front.png",
+          "anchor": [
+            0.5,
+            0.94
+          ],
+          "mouth": [
+            0.5049,
+            0.2445
+          ],
+          "mouthW": 0.0703,
+          "skin": "rgb(217,160,111)"
+        },
+        "walk2": {
+          "key": "walk2",
+          "src": "assets/characters/library/aton/fullBody.png",
+          "anchor": [
+            0.5,
+            0.94
+          ],
+          "mouth": [
+            0.5049,
+            0.2445
+          ],
+          "mouthW": 0.0703,
+          "skin": "rgb(217,160,111)"
+        },
+        "turn": {
+          "key": "turn",
+          "src": "assets/characters/library/aton/side.png",
+          "anchor": [
+            0.5,
+            0.94
+          ],
+          "mouth": [
+            0.5049,
+            0.2445
+          ],
+          "mouthW": 0.0703,
+          "skin": "rgb(217,160,111)"
+        },
+        "back": {
+          "key": "back",
+          "src": "assets/characters/library/aton/back.png",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        }
+      }
+    },
+    "char-c": {
+      "id": "char-c",
+      "name": "吨吨",
+      "width": 1024,
+      "height": 1536,
+      "defaultPose": "stand",
+      "poses": {
+        "stand": {
+          "key": "stand",
+          "src": "assets/characters/library/dundun/fullBody.png",
+          "anchor": [
+            0.5,
+            0.885
+          ],
+          "mouth": [
+            0.5245,
+            0.4756
+          ],
+          "mouthW": 0.1133,
+          "skin": "rgb(197,140,93)"
+        },
+        "sit": {
+          "key": "sit",
+          "src": "assets/characters/library/dundun/halfBody.png",
+          "anchor": [
+            0.5,
+            0.95
+          ],
+          "mouth": [
+            0.5245,
+            0.4756
+          ],
+          "mouthW": 0.1133,
+          "skin": "rgb(197,140,93)"
+        },
+        "walk1": {
+          "key": "walk1",
+          "src": "assets/characters/library/dundun/front.png",
+          "anchor": [
+            0.5,
+            0.885
+          ],
+          "mouth": [
+            0.5245,
+            0.4756
+          ],
+          "mouthW": 0.1133,
+          "skin": "rgb(197,140,93)"
+        },
+        "walk2": {
+          "key": "walk2",
+          "src": "assets/characters/library/dundun/fullBody.png",
+          "anchor": [
+            0.5,
+            0.885
+          ],
+          "mouth": [
+            0.5245,
+            0.4756
+          ],
+          "mouthW": 0.1133,
+          "skin": "rgb(197,140,93)"
+        },
+        "turn": {
+          "key": "turn",
+          "src": "assets/characters/library/dundun/side.png",
+          "anchor": [
+            0.5,
+            0.885
+          ],
+          "mouth": [
+            0.5245,
+            0.4756
+          ],
+          "mouthW": 0.1133,
+          "skin": "rgb(197,140,93)"
+        },
+        "back": {
+          "key": "back",
+          "src": "assets/characters/library/dundun/back.png",
+          "anchor": [
+            0.5,
+            0.885
+          ]
+        }
+      }
+    }
+  },
+  "scenes": {
+    "scene-street-food": {
+      "id": "scene-street-food",
+      "palette": "scene-street-food",
+      "baseline": 1560
+    },
+    "scene-night-market": {
+      "id": "scene-night-market",
+      "palette": "scene-night-market",
+      "baseline": 1560
+    },
+    "scene-fresh-market": {
+      "id": "scene-fresh-market",
+      "palette": "scene-fresh-market",
+      "baseline": 1560
+    },
+    "scene-convenience-store": {
+      "id": "scene-convenience-store",
+      "palette": "scene-convenience-store",
+      "baseline": 1560
+    },
+    "scene-bts-mrt": {
+      "id": "scene-bts-mrt",
+      "palette": "scene-bts-mrt",
+      "baseline": 1560
+    },
+    "scene-apartment": {
+      "id": "scene-apartment",
+      "palette": "scene-apartment",
+      "baseline": 1560
+    },
+    "scene-cafe": {
+      "id": "scene-cafe",
+      "palette": "scene-cafe",
+      "baseline": 1560
+    },
+    "scene-office": {
+      "id": "scene-office",
+      "palette": "scene-office",
+      "baseline": 1560
+    },
+    "scene-school": {
+      "id": "scene-school",
+      "palette": "scene-school",
+      "baseline": 1560
+    },
+    "scene-mall": {
+      "id": "scene-mall",
+      "palette": "scene-mall",
+      "baseline": 1560
+    },
+    "scene-park": {
+      "id": "scene-park",
+      "palette": "scene-park",
+      "baseline": 1560
+    },
+    "scene-street-motorcycle": {
+      "id": "scene-street-motorcycle",
+      "palette": "scene-street-motorcycle",
+      "baseline": 1560
+    }
+  },
+  "actions": {
+    "idle": {
+      "id": "idle",
+      "poses": [
+        "stand"
+      ],
+      "phases": 1,
+      "move": [
+        0,
+        0
+      ],
+      "bob": 2
+    },
+    "talk": {
+      "id": "talk",
+      "poses": [
+        "stand"
+      ],
+      "phases": 2,
+      "move": [
+        0,
+        0
+      ],
+      "bob": 4
+    },
+    "sit": {
+      "id": "sit",
+      "poses": [
+        "sit"
+      ],
+      "phases": 1,
+      "move": [
+        0,
+        0
+      ],
+      "bob": 0
+    },
+    "stand-up": {
+      "id": "stand-up",
+      "poses": [
+        "sit",
+        "stand",
+        "stand"
+      ],
+      "phases": 3,
+      "move": [
+        0,
+        -0.06
+      ],
+      "bob": 0
+    },
+    "walk": {
+      "id": "walk",
+      "poses": [
+        "stand",
+        "walk1",
+        "walk2",
+        "walk1",
+        "stand"
+      ],
+      "phases": 5,
+      "move": [
+        0.3,
+        0
+      ],
+      "bob": 12,
+      "rotate": 3
+    },
+    "walk-to-kitchen": {
+      "id": "walk-to-kitchen",
+      "poses": [
+        "stand",
+        "walk1",
+        "walk2",
+        "walk1",
+        "stand"
+      ],
+      "phases": 5,
+      "from": "sofa",
+      "to": "kitchen",
+      "move": [
+        0.42,
+        0
+      ],
+      "bob": 12,
+      "rotate": 3,
+      "transition": "slide"
+    },
+    "turn": {
+      "id": "turn",
+      "poses": [
+        "stand",
+        "turn",
+        "back"
+      ],
+      "phases": 3,
+      "move": [
+        0.05,
+        0
+      ],
+      "bob": 0
+    },
+    "greet": {
+      "id": "greet",
+      "poses": [
+        "stand",
+        "walk1",
+        "stand"
+      ],
+      "phases": 3,
+      "move": [
+        0,
+        0
+      ],
+      "bob": 6,
+      "rotate": 4
+    },
+    "narration": {
+      "id": "narration",
+      "poses": [
+        "stand"
+      ],
+      "phases": 1,
+      "move": [
+        0,
+        0
+      ],
+      "bob": 0
+    }
+  }
+}

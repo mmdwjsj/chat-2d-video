@@ -4,6 +4,8 @@ import type { Character, VoiceConfig } from '@thai-video/core/types';
 import { LANGUAGE_LABELS } from '../language';
 import { assetUrl, countImages, REFERENCE_SLOTS } from '../characterLibrary';
 import type { LibraryCharacter } from '../characterLibrary';
+import { useAnimationAssets } from '../animationAssets';
+import { AssetSlotGrid } from '../AssetSlotGrid';
 import { Badge, Banner, Card, Empty, Field, InlineBar, Modal, SectionTitle, TextArea } from '../ui';
 
 const VoiceFields: React.FC<{
@@ -37,6 +39,7 @@ export const CharactersPage: React.FC<{ embedded?: boolean }> = ({ embedded = fa
   const removeCharacter = useWorkbench((s) => s.removeCharacter);
   const replaceCharacterImages = useWorkbench((s) => s.replaceCharacterImages);
   const [picker, setPicker] = useState<PickerMode | null>(null);
+  const anim = useAnimationAssets();
 
   const update = (id: string, patch: Partial<Character>): void => {
     updateCharacters(bundle.characters.map((c) => (c.id === id ? { ...c, ...patch } : c)));
@@ -184,6 +187,26 @@ export const CharactersPage: React.FC<{ embedded?: boolean }> = ({ embedded = fa
                 点任一格可单独上传本地图片替换；从资源库选人时六张会一次带出，不必逐张传。
                 表情参考图 {character.referenceImages.expressions.length} 张 · 动作参考图 {character.referenceImages.actions.length} 张
               </p>
+
+              <div className="mb-2 mt-4 flex flex-wrap items-center justify-between gap-2">
+                <p className="text-xs font-semibold text-stone-600">
+                  动作姿态图 <span className="font-normal text-stone-400">（上传后直接用于动画，未传的姿态沿用六视图近似）</span>
+                </p>
+                <span className="text-[11px] text-stone-400">{anim.busy ? '上传中…' : ''}</span>
+              </div>
+              <AssetSlotGrid
+                slots={anim.assets.poseKeys.length ? anim.assets.poseKeys : []}
+                values={anim.assets.characters[character.id]?.poses ?? {}}
+                buildTarget={(key) => ({ kind: 'characterPose', id: character.id, key })}
+                onUpload={anim.upload}
+                onClear={anim.clear}
+                busy={anim.busy}
+              />
+              <p className="mt-1.5 text-[11px] leading-5 text-stone-400">
+                站立 / 坐姿 / 两个迈步帧 / 侧身 / 背面。传了真动作图，走路、起身才会真的换姿态；
+                同一人物不同姿态建议用同尺寸透明底图，嘴部标定跟随注册表里该姿态的配置。
+              </p>
+              {anim.error && <Banner tone="warn">动画资产：{anim.error}</Banner>}
 
               <div className="mt-4 grid gap-2 sm:grid-cols-2">
                 <VoiceFields title="中文声音" voice={character.voices.zh}

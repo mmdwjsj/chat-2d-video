@@ -4,6 +4,8 @@ import type { AppConfig } from '@thai-video/core';
 export * from './timeline.js';
 export * from './commands.js';
 export * from './sceneArt.js';
+export * from './animatedFrame.js';
+export * from './frameSequence.js';
 export * from './mouth.js';
 export * from './frames.js';
 export * from './ffmpeg.js';

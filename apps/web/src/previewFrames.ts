@@ -18,6 +18,11 @@ export type PreviewShotFrames = {
   /** 服务端给出的配音地址（导出留存 / 镜头已挂 WAV）；null = 无配音 */
   audioUrl: string | null;
   lipSource: 'voice' | 'text' | 'none';
+  /** 动画帧档（与成片同源）；有值时播放器按 frameKeys 切帧 */
+  frameKeys?: string[];
+  framesByKey?: Record<string, string>;
+  /** 显式降级说明 */
+  degradations?: string[];
 };
 
 export type PreviewFramesPayload = {

@@ -1,0 +1,67 @@
+{
+  "slug": "nina",
+  "source": "assets/characters/library/nina/fullBody.png",
+  "canvas": {
+    "w": 1024,
+    "h": 1536
+  },
+  "baseColor": [
+    227,
+    224,
+    217
+  ],
+  "parts": {
+    "head": {
+      "src": "assets/characters/cutout/nina/head.png",
+      "box": {
+        "x": 348,
+        "y": 117,
+        "w": 337,
+        "h": 348
+      },
+      "pivot": {
+        "x": 517,
+        "y": 457
+      }
+    },
+    "torso": {
+      "src": "assets/characters/cutout/nina/torso.png",
+      "box": {
+        "x": 337,
+        "y": 451,
+        "w": 411,
+        "h": 497
+      },
+      "pivot": {
+        "x": 525,
+        "y": 934
+      }
+    },
+    "legL": {
+      "src": "assets/characters/cutout/nina/legL.png",
+      "box": {
+        "x": 339,
+        "y": 918,
+        "w": 186,
+        "h": 550
+      },
+      "pivot": {
+        "x": 521,
+        "y": 934
+      }
+    },
+    "legR": {
+      "src": "assets/characters/cutout/nina/legR.png",
+      "box": {
+        "x": 525,
+        "y": 918,
+        "w": 191,
+        "h": 550
+      },
+      "pivot": {
+        "x": 529,
+        "y": 934
+      }
+    }
+  }
+}

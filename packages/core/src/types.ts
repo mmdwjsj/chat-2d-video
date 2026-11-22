@@ -142,6 +142,24 @@ export type Script = {
 
 /* -------------------------------------------------------------------------- */
 
+/**
+ * 剧本行为指令：把对白行里「从沙发站起来走到厨房」这类连续行为
+ * 拆成带主体、动作、起止锚点与时间的可执行单元。
+ * 与 packages/animation 的 ActionCue 结构兼容，避免包之间产生循环依赖。
+ */
+export type ActionCue = {
+  actorId: string;
+  verb: string;
+  clipId: string;
+  from?: string;
+  to?: string;
+  target?: string;
+  startSec: number;
+  durationSec: number;
+};
+
+/* -------------------------------------------------------------------------- */
+
 /** 分镜：整个系统的核心数据对象。 */
 export type Shot = {
   id: string;
@@ -154,6 +172,8 @@ export type Shot = {
   sceneHint: string;
   characterIds: string[];
   action: string;
+  /** 结构化行为指令；旧数据可缺省，缺省时由 action 文本即时解析 */
+  actionCues?: ActionCue[];
   expression: string;
   shotSize: string;
   cameraAngle: string;

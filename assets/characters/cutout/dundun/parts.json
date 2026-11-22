@@ -1,0 +1,67 @@
+{
+  "slug": "dundun",
+  "source": "assets/characters/library/dundun/fullBody.png",
+  "canvas": {
+    "w": 1024,
+    "h": 1536
+  },
+  "baseColor": [
+    225,
+    223,
+    215
+  ],
+  "parts": {
+    "head": {
+      "src": "assets/characters/cutout/dundun/head.png",
+      "box": {
+        "x": 215,
+        "y": 244,
+        "w": 594,
+        "h": 349
+      },
+      "pivot": {
+        "x": 513,
+        "y": 585
+      }
+    },
+    "torso": {
+      "src": "assets/characters/cutout/dundun/torso.png",
+      "box": {
+        "x": 194,
+        "y": 579,
+        "w": 645,
+        "h": 528
+      },
+      "pivot": {
+        "x": 515,
+        "y": 1093
+      }
+    },
+    "legL": {
+      "src": "assets/characters/cutout/dundun/legL.png",
+      "box": {
+        "x": 285,
+        "y": 1077,
+        "w": 230,
+        "h": 285
+      },
+      "pivot": {
+        "x": 511,
+        "y": 1093
+      }
+    },
+    "legR": {
+      "src": "assets/characters/cutout/dundun/legR.png",
+      "box": {
+        "x": 515,
+        "y": 1077,
+        "w": 229,
+        "h": 285
+      },
+      "pivot": {
+        "x": 519,
+        "y": 1093
+      }
+    }
+  }
+}

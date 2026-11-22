@@ -8,6 +8,11 @@ import type { Character, ExportMode, Scene, Script, Shot } from '@thai-video/cor
 import { registerHandlers } from './handlers.js';
 import { buildPreviewFrames } from './previewFrames.js';
 import * as V from './validation.js';
+import {
+  applyUpload, clearSlot, loadSlots,
+} from './animationAssets.js';
+import type { AssetTarget } from './animationAssets.js';
+import { loadStudio, saveStudio } from './sceneStudio.js';
 
 export class HttpError extends Error {
   constructor(public readonly statusCode: number, message: string) {
@@ -361,6 +366,54 @@ export const createApp = () => {
   app.post('/api/assets/images', wrap((req, res) => {
     const input = V.parseOrThrow(V.uploadImageSchema, req.body);
     res.status(201).json({ asset: wb.assets.saveImage(input) });
+  }));
+
+  /**
+   * 动画资产（人物姿态图 / 场景真图）：上传后把路径写回 config/animation.json。
+   * 注册表是唯一真值，写文件即触发 animationWiring 的 mtime 重载，界面传图立刻生效。
+   */
+  app.get('/api/animation-assets', wrap((_req, res) => {
+    res.json({ assets: loadSlots() });
+  }));
+
+  app.post('/api/animation-assets', wrap((req, res) => {
+    const input = V.parseOrThrow(V.uploadAnimationAssetSchema, req.body);
+    const target = input.target as AssetTarget;
+    const slot = target.kind === 'characterPose'
+      ? `pose-${target.key}` : target.kind === 'sceneBackground'
+        ? 'scene-bg' : `layer-${target.key}`;
+    const ownerId = target.kind === 'characterPose'
+      ? target.id : `scene-${target.id.replace(/^scene-/, '')}`;
+    const asset = wb.assets.saveImage({
+      base64: input.base64,
+      mimeType: input.mimeType,
+      fileName: input.fileName,
+      characterId: ownerId,
+      slot,
+    });
+    res.status(201).json({ asset, assets: applyUpload(target, asset.path) });
+  }));
+
+  app.post('/api/animation-assets/clear', wrap((req, res) => {
+    const input = V.parseOrThrow(V.clearAnimationAssetSchema, req.body);
+    res.json({ assets: clearSlot(input.target as AssetTarget) });
+  }));
+
+  /**
+   * 场景工程：可编辑的分层画板。
+   * GET 返回元素数据（注册表里有 studio 就用它，否则给默认模板）；
+   * POST 保存时把每层导出成 SVG 落到 assets/scenes/<id>/，并写回 layers[].src，渲染立即生效。
+   */
+  app.get('/api/scene-studio/:sceneId', wrap((req, res) => {
+    res.json(loadStudio(req.params.sceneId));
+  }));
+
+  app.post('/api/scene-studio/:sceneId', wrap((req, res) => {
+    try {
+      res.json({ ok: true, ...saveStudio(req.params.sceneId, req.body) });
+    } catch (error) {
+      res.status(400).json({ error: error instanceof Error ? error.message : '保存失败' });
+    }
   }));
 
   app.get('/api/assets', wrap((req, res) => {

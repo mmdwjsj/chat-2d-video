@@ -61,9 +61,13 @@ export const FramePlayer: React.FC<Props> = ({
 
   const timeline = animate && shot?.timeline?.length ? shot.timeline : null;
   const fps = shot?.fps ?? 30;
+  // 动画帧档优先：有 framesByKey 就按 frameKeys 切档，否则回退到原有 4 档口型。
+  const keyed = Boolean(shot?.framesByKey && Object.keys(shot.framesByKey).length > 0);
   const shapes = useMemo(
-    () => MOUTH_SHAPES.filter((shape) => Boolean(shot?.frames[shape])),
-    [shot],
+    () => keyed
+      ? Object.keys(shot?.framesByKey ?? {})
+      : MOUTH_SHAPES.filter((shape) => Boolean(shot?.frames[shape])),
+    [shot, keyed],
   );
 
   // 换镜头 / 切到静态模式时从头播，不继承上一个镜头的进度。
@@ -118,8 +122,10 @@ export const FramePlayer: React.FC<Props> = ({
     }
   }, [playing, audioUrl, shot?.shotId]);
 
-  const wanted = timeline ? (timeline[Math.min(frame, timeline.length - 1)] ?? 'closed') : 'closed';
-  const current: MouthShape = shapes.includes(wanted) ? wanted : (shapes[0] ?? 'closed');
+  const wanted = keyed
+    ? (shot?.frameKeys?.[Math.min(frame, (shot.frameKeys?.length ?? 1) - 1)] ?? shapes[0] ?? 'closed')
+    : (timeline ? (timeline[Math.min(frame, timeline.length - 1)] ?? 'closed') : 'closed');
+  const current = shapes.includes(wanted) ? wanted : (shapes[0] ?? 'closed');
   const ready = Boolean(shot && shapes.length > 0 && scale > 0);
   const seek = (k: number): void => {
     frameRef.current = k;
@@ -147,7 +153,9 @@ export const FramePlayer: React.FC<Props> = ({
                 width={FRAME_W}
                 height={FRAME_H}
                 scrolling="no"
-                srcDoc={shot.frames[shape]}
+                srcDoc={keyed
+                  ? (shot.framesByKey?.[shape] ?? '')
+                  : (shot.frames[shape as MouthShape] ?? '')}
                 className="absolute inset-0 border-0 bg-transparent"
                 style={{ visibility: shape === current ? 'visible' : 'hidden', pointerEvents: 'none' }}
               />
@@ -201,6 +209,8 @@ export const FramePlayer: React.FC<Props> = ({
           </div>
           <p className="text-center text-[10px] text-stone-400">
             {LIP_LABEL[shot.lipSource]} · 与成片同一套画面
+            {keyed ? ' · 动画帧（姿态 / 视差）' : ''}
+            {shot.degradations?.length ? ` · 降级：${shot.degradations[0]}` : ''}
             {audioUrl ? ' · 配音已就绪（浏览器拦截自动播放时点「重开声音」）' : ' · 暂无配音'}
           </p>
         </div>

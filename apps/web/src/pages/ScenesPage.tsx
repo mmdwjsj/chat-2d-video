@@ -2,22 +2,27 @@ import React, { useState } from 'react';
 import { useWorkbench } from '../store';
 import { emptyScene } from '@thai-video/core/types';
 import type { Scene } from '@thai-video/core/types';
-import { Badge, Field, InlineBar, Modal, SectionTitle } from '../ui';
+import { Badge, Banner, Field, InlineBar, Modal, SectionTitle } from '../ui';
 import { sceneThumbUrl } from '../sceneThumb';
+import { useAnimationAssets, LAYER_SLOTS } from '../animationAssets';
+import { AssetSlotGrid } from '../AssetSlotGrid';
+import { assetUrl } from '../characterLibrary';
+import { SceneStudio } from '../SceneStudio';
 
 /**
- * 场景段：只读缩略图墙。
+ * 场景段：缩略图墙 + 编辑弹窗。
  *
- * 以前这里是 12 张卡片 × 9 个输入框（约 108 个控件），但时间/天气/光线/镜头角度
- * 填了不生效、背景图路径也没接进渲染，纯属让用户做无用功。现在：
- * - 卡片只展示「长什么样」+「什么时候会被用到」；
- * - 真的需要改的只有 4 项（名称/类型/地点/关键词），收进编辑弹窗；
- * - 加不加场景仍然可以，但不再是必须走的步骤。
+ * 名称/类型/地点/关键词影响场景匹配；场景真图（整张底图或分层图）在这里直接上传，
+ * 上传后写回 config/animation.json 注册表，预览与成片立即生效，不需要改代码。
  */
 export const ScenesPage: React.FC<{ embedded?: boolean }> = ({ embedded = false }) => {
   const bundle = useWorkbench((s) => s.bundle)!;
   const updateScenes = useWorkbench((s) => s.updateScenes);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [studioId, setStudioId] = useState<string | null>(null);
+  /** 画板保存后，卡片缩略图直接换成导出的 preview.svg（带时间戳避开缓存）。 */
+  const [previews, setPreviews] = useState<Record<string, string>>({});
+  const anim = useAnimationAssets();
 
   const editing = bundle.scenes.find((s) => s.id === editingId) ?? null;
 
@@ -65,7 +70,7 @@ export const ScenesPage: React.FC<{ embedded?: boolean }> = ({ embedded = false 
                 title="点开编辑名称与关键词"
               >
                 {/* 卡片是扁的，默认居中裁切只会露出天空；往下压一点，露出的才是摊位/货架这些识别点 */}
-                <img src={sceneThumbUrl(scene)} alt={`${scene.name || scene.id} 缩略图`}
+                <img src={previews[scene.id] ?? sceneThumbUrl(scene)} alt={`${scene.name || scene.id} 缩略图`}
                   className="absolute inset-0 h-full w-full object-cover object-[50%_72%]" />
               </button>
               <div className="flex min-w-0 flex-1 flex-col justify-between">
@@ -129,6 +134,55 @@ export const ScenesPage: React.FC<{ embedded?: boolean }> = ({ embedded = false 
               onChange={(v) => update(editing.id, {
                 keywords: v.split(/[,，]/).map((s) => s.trim()).filter(Boolean),
               })} />
+
+            <div className="rounded-lg border border-warm/40 bg-orange-50/50 p-3">
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold text-stone-700">场景画板</p>
+                  <p className="mt-0.5 text-[11px] leading-5 text-stone-500">
+                    不喜欢程序化生成的画面？进画板自己摆：拖色块改位置、逐层调视差，保存后导出到
+                    <code className="mx-0.5 rounded bg-white px-1">assets/scenes/{editing.id}/</code>并立即生效。
+                  </p>
+                </div>
+                <button className="btn btn-primary shrink-0 py-1 text-xs" onClick={() => setStudioId(editing.id)}>
+                  打开场景画板
+                </button>
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-stone-200 p-3">
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                <p className="text-xs font-semibold text-stone-600">
+                  场景真图 <span className="font-normal text-stone-400">（不传则用程序化色块分层）</span>
+                </p>
+                <span className="text-[11px] text-stone-400">{anim.busy ? '上传中…' : ''}</span>
+              </div>
+              <p className="mb-2 text-[11px] leading-5 text-stone-500">
+                整张底图 = 一张铺满、不参与视差；分层图 = 按远景/中景/前景各自移动，产生视差和遮挡。
+                两种任选其一，挂了分层图会自动让整张底图让位。
+              </p>
+              <AssetSlotGrid
+                slots={[{ key: 'background', label: '整张底图' }]}
+                values={{ background: anim.assets.scenes[editing.id]?.backgroundImage ?? { src: '', ready: false } }}
+                buildTarget={() => ({ kind: 'sceneBackground', id: editing.id })}
+                onUpload={anim.upload}
+                onClear={anim.clear}
+                busy={anim.busy}
+                columns={3}
+              />
+              <p className="mb-1.5 mt-3 text-[11px] font-semibold text-stone-600">分层真图（可选，逐层叠加）</p>
+              <AssetSlotGrid
+                slots={anim.assets.layerKeys.length ? anim.assets.layerKeys : LAYER_SLOTS}
+                values={anim.assets.scenes[editing.id]?.layers ?? {}}
+                buildTarget={(key) => ({ kind: 'sceneLayer', id: editing.id, key })}
+                onUpload={anim.upload}
+                onClear={anim.clear}
+                busy={anim.busy}
+                columns={3}
+              />
+              {anim.error && <Banner tone="warn">动画资产：{anim.error}</Banner>}
+            </div>
+
             <p className="text-[11px] leading-relaxed text-stone-500">
               改完自动保存。时间、天气、光线、镜头角度不再单独配置：
               夜市场景天然是夜景、办公室天然是白天，靠场景本身表达，少填一堆不会生效的框。
@@ -136,6 +190,18 @@ export const ScenesPage: React.FC<{ embedded?: boolean }> = ({ embedded = false 
             </p>
           </div>
         </Modal>
+      )}
+
+      {studioId && (
+        <SceneStudio
+          sceneId={studioId}
+          sceneName={bundle.scenes.find((s) => s.id === studioId)?.name ?? ''}
+          onClose={() => setStudioId(null)}
+          onSaved={(id, preview) => {
+            setPreviews((prev) => ({ ...prev, [id]: `${assetUrl(preview)}?v=${Date.now()}` }));
+            void anim.reload();
+          }}
+        />
       )}
     </div>
   );

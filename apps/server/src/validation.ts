@@ -98,6 +98,32 @@ export const uploadImageSchema = z.object({
   slot: z.string().max(120).optional(),
 }).strict();
 
+/** 动画资产上传：目标槽位用白名单枚举，禁止任意写路径。 */
+const assetId = z.string().min(1).max(120).regex(/^[A-Za-z0-9_-]+$/);
+
+export const animationAssetTargetSchema = z.discriminatedUnion('kind', [
+  z.object({
+    kind: z.literal('characterPose'), id: assetId,
+    key: z.enum(['stand', 'sit', 'walk1', 'walk2', 'turn', 'back']),
+  }).strict(),
+  z.object({ kind: z.literal('sceneBackground'), id: assetId }).strict(),
+  z.object({
+    kind: z.literal('sceneLayer'), id: assetId,
+    key: z.enum(['sky', 'far', 'mid', 'near', 'foreground']),
+  }).strict(),
+]);
+
+export const uploadAnimationAssetSchema = z.object({
+  fileName: z.string().max(200).optional(),
+  base64: z.string().min(1).max(25_000_000),
+  mimeType: z.enum(['image/png', 'image/jpeg', 'image/webp']).optional(),
+  target: animationAssetTargetSchema,
+}).strict();
+
+export const clearAnimationAssetSchema = z.object({
+  target: animationAssetTargetSchema,
+}).strict();
+
 export const parseOrThrow = <T extends z.ZodTypeAny>(schema: T, input: unknown): z.infer<T> => {
   const result = schema.safeParse(input);
   if (!result.success) {
